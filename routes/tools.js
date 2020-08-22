@@ -1,8 +1,11 @@
 const router = require("express").Router();
 
-/* GET tools listing. */
-router.get("/", function (req, res) {
-  res.send("This is tools route");
-});
+const toolHandler = require("./handler/tools");
+
+router.get("/", toolHandler.getAllTools);
+router.get("/:id", toolHandler.getTool);
+router.post("/", toolHandler.create);
+router.put("/:id", toolHandler.update);
+router.delete("/:id", toolHandler.destroy);
 
 module.exports = router;

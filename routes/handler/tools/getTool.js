@@ -13,6 +13,9 @@ module.exports = async (req, res) => {
     });
   }
 
+  //? Change image data to be URL ?//
+  tool.image = `${req.get("host")}/${tool.image}`;
+
   return res.json({
     status: "success",
     data: tool,

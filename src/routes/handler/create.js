@@ -1,7 +1,18 @@
 const Image = require("../../models/Image");
 
+const Validator = require("fastest-validator");
+const v = new Validator();
+
 module.exports = async (req, res) => {
   const imageType = req.body.imageType;
+  const schema = {
+    imageType: { type: "enum", values: ["tool", "course", "mentor", "user"] },
+  };
+
+  const validate = v.validate(req.body, schema);
+  if (validate.length) {
+    return res.status(400).json({ status: "error", message: validate });
+  }
 
   if (!req.file) {
     return res

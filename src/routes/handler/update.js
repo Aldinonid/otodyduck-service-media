@@ -1,6 +1,9 @@
 const Image = require("../../models/Image");
+
 const fs = require("fs");
 const path = require("path");
+const Validator = require("fastest-validator");
+const v = new Validator();
 
 module.exports = async (req, res) => {
   const imageId = req.params.id;
@@ -11,6 +14,15 @@ module.exports = async (req, res) => {
     return res
       .status(404)
       .json({ status: "error", message: "Image not found" });
+  }
+
+  const schema = {
+    imageType: { type: "enum", values: ["tool", "course", "mentor", "user"] },
+  };
+
+  const validate = v.validate(req.body, schema);
+  if (validate.length) {
+    return res.status(400).json({ status: "error", message: validate });
   }
 
   if (req.file) {

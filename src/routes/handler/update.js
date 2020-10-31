@@ -5,6 +5,8 @@ const path = require("path");
 const Validator = require("fastest-validator");
 const v = new Validator();
 
+const { HOSTNAME } = process.env;
+
 module.exports = async (req, res) => {
   const imageId = req.params.id;
   const imageType = req.body.imageType;
@@ -37,7 +39,7 @@ module.exports = async (req, res) => {
 
   await imageData.save();
 
-  imageData.image = `${req.get("host")}/${imageData.image}`;
+  imageData.image = `${HOSTNAME}/${imageData.image}`;
 
   return res.json({ status: "success", data: imageData });
 };

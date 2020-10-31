@@ -3,6 +3,8 @@ const Image = require("../../models/Image");
 const Validator = require("fastest-validator");
 const v = new Validator();
 
+const { HOSTNAME } = process.env;
+
 module.exports = async (req, res) => {
   const imageType = req.body.imageType;
   const schema = {
@@ -29,7 +31,7 @@ module.exports = async (req, res) => {
     status: "success",
     data: {
       ...imageCreate._doc,
-      image: `${req.get("host")}/${imageCreate.image}`,
+      image: `${HOSTNAME}/${imageCreate.image}`,
     },
   });
 };

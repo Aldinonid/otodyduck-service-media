@@ -6,7 +6,9 @@ const logger = require("morgan");
 const mongoose = require("mongoose");
 
 //? DATABASES ?//
-mongoose.connect(`mongodb+srv://aldinonid:${process.env.DB_PASSWORD}@otodyduck-cluster.wmasw.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
+const { DB_PRODUCTION, DB_LOCAL } = process.env;
+
+mongoose.connect(DB_LOCAL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

@@ -1,3 +1,6 @@
+const isBase64 = require("is-base64");
+const base64Img = require("base64-img");
+
 const Image = require("../../models/Image");
 
 const fs = require("fs");
@@ -7,9 +10,11 @@ const v = new Validator();
 
 const { HOSTNAME } = process.env;
 
+//* File handler using base64Img *//
 module.exports = async (req, res) => {
   const imageId = req.params.id;
   const imageType = req.body.imageType;
+  const image = req.body.image;
   const imageData = await Image.findById(imageId).exec();
 
   if (!imageData) {
@@ -19,7 +24,7 @@ module.exports = async (req, res) => {
   }
 
   const schema = {
-    imageType: { type: "enum", values: ["tool", "course", "mentor", "user"] },
+    imageType: { type: "enum", values: ["tool", "course", "user"] },
   };
 
   const validate = v.validate(req.body, schema);
@@ -27,19 +32,70 @@ module.exports = async (req, res) => {
     return res.status(400).json({ status: "error", message: validate });
   }
 
-  if (req.file) {
-    fs.unlink(path.join(imageData.image), (err) =>
-      err ? console.log(`Error: ${err}`) : null
-    );
-    imageData.image = `images/${imageType}/${req.file.filename}`;
-    await imageData.save();
+  if (!isBase64(image, { mimeRequired: true })) {
+    return res.status(400).json({ status: "error", message: "Invalid base64" });
   }
 
-  imageData.imageType = imageType;
+  base64Img.img(
+    image,
+    `./images/${imageType}`,
+    Date.now(),
+    async (err, filepath) => {
+      err && res.status(400).json({ status: "error", message: err.message });
 
-  await imageData.save();
+      fs.unlink(path.join(imageData.image), (err) =>
+        err ? console.log(`Error: ${err}`) : null
+      );
 
-  imageData.image = `${HOSTNAME}/${imageData.image}`;
+      const filename = filepath.split("\\").pop().split("/").pop();
 
-  return res.json({ status: "success", data: imageData });
+      imageData.image = `images/${imageType}/${filename}`;
+      imageData.imageType = imageType;
+
+      await imageData.save();
+
+      imageData.image = `${HOSTNAME}/${imageData.image}`;
+
+      return res.json({ status: "success", data: imageData });
+    }
+  );
 };
+
+//* File handler using multer *//
+
+// module.exports = async (req, res) => {
+//   const imageId = req.params.id;
+//   const imageType = req.body.imageType;
+//   const imageData = await Image.findById(imageId).exec();
+
+//   if (!imageData) {
+//     return res
+//       .status(404)
+//       .json({ status: "error", message: "Image not found" });
+//   }
+
+//   const schema = {
+//     imageType: { type: "enum", values: ["tool", "course", "mentor", "user"] },
+//   };
+
+//   const validate = v.validate(req.body, schema);
+//   if (validate.length) {
+//     return res.status(400).json({ status: "error", message: validate });
+//   }
+
+//   if (req.file) {
+//     fs.unlink(path.join(imageData.image), (err) =>
+//       err ? console.log(`Error: ${err}`) : null
+//     );
+//     imageData.image = `images/${imageType}/${req.file.filename}`;
+//     await imageData.save();
+//   }
+
+//   imageData.imageType = imageType;
+
+//   await imageData.save();
+
+//   imageData.image = `${HOSTNAME}/${imageData.image}`;
+
+//   return res.json({ status: "success", data: imageData });
+// };

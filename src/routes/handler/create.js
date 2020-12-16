@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
   const image = req.body.image;
 
   const schema = {
-    imageType: { type: "enum", values: ["tool", "course", "user"] },
+    imageType: { type: "enum", values: ["tool", "course", "user", "flow"] },
   };
 
   const validate = v.validate(req.body, schema);

@@ -9,7 +9,7 @@ const ImageSchema = new Schema(
     },
     imageType: {
       type: String,
-      enum: ["tool", "course", "user"],
+      enum: ["tool", "course", "user", "flow"],
       required: true,
     },
   },
